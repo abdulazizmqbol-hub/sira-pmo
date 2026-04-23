@@ -1292,6 +1292,39 @@ tfoot td { padding: 10px 13px; font-weight: 800; background: var(--off); color: 
 <div class="toast" id="toast"></div>
 
 <script>
+// ══ DEMO USERS (Sira) ══
+const DEMO_USERS = [
+  {email:'admin@sira.sa',  pass:'admin123', name:'Abdulaziz Maqboul', role:'admin',  roleLabel:'Admin',       av:'A'},
+  {email:'pmo@sira.sa',    pass:'pmo123',   name:'Sarah Khalid',      role:'pmo',    roleLabel:'PMO Manager', av:'S'},
+  {email:'pm@sira.sa',     pass:'pm123',    name:'Ahmed Saad',        role:'pm',     roleLabel:'Proj. Mgr',   av:'A'},
+  {email:'vip@sira.sa',    pass:'vip123',   name:'Faisal Omar',       role:'viewer', roleLabel:'Leadership',  av:'F'},
+];
+
+// ══ LOGIN UX FUNCTIONS ══
+let loginLang = 'en';
+
+function clearMsg(){const el=document.getElementById('auth-msg');if(el){el.style.display='none';el.textContent='';}}
+
+function showMsg(msg,type){const el=document.getElementById('auth-msg');if(!el)return;el.textContent=msg;el.style.display='block';el.style.background=type==='ok'?'var(--emerald2)':'var(--crimson2)';el.style.color=type==='ok'?'var(--emerald)':'var(--crimson)';}
+
+function checkStrength(pass){const bar=document.getElementById('str-bar'),txt=document.getElementById('str-txt');if(!bar)return;let s=0;if(pass.length>=8)s++;if(pass.length>=12)s++;if(/[A-Z]/.test(pass))s++;if(/[0-9]/.test(pass))s++;if(/[^A-Za-z0-9]/.test(pass))s++;const l=[{w:'0%',c:'transparent',t:''},{w:'25%',c:'#B5341F',t:'Weak'},{w:'50%',c:'#C45E08',t:'Fair'},{w:'75%',c:'#C9A84C',t:'Good'},{w:'100%',c:'#0B6B44',t:'Strong ✓'}][Math.min(s,4)];bar.style.width=l.w;bar.style.background=l.c;if(txt){txt.textContent=l.t;txt.style.color=l.c;}}
+
+function togglePass(id,eid){const i=document.getElementById(id),e=document.getElementById(eid);if(!i)return;if(i.type==='password'){i.type='text';if(e)e.textContent='🙈';}else{i.type='password';if(e)e.textContent='👁';}}
+
+function setLoginLang(l){loginLang=l;const e=document.getElementById('ll-btn-en'),a=document.getElementById('ll-btn-ar');if(e){e.style.background=l==='en'?'var(--navy)':'none';e.style.color=l==='en'?'#fff':'var(--muted)';}if(a){a.style.background=l==='ar'?'var(--navy)':'none';a.style.color=l==='ar'?'#fff':'var(--muted)';}}
+
+function showForgot(){document.querySelectorAll('.lform').forEach(f=>f.classList.remove('active'));const f=document.getElementById('lf-forgot');if(f)f.classList.add('active');document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));}
+
+async function sendReset(){const email=document.getElementById('forgot-email').value.trim();if(!email)return;try{await SB.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});}catch(e){}showMsg('✅ Reset link sent!','ok');}
+
+async function signInGoogle(){try{const{error}=await SB.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});if(error)showMsg(error.message,'err');}catch(e){showMsg('Google not configured yet.','err');}}
+
+async function sendMagicLink(){const email=document.getElementById('l-email').value.trim();if(!email){showMsg('Enter your email first','err');return;}try{await SB.auth.signInWithOtp({email});}catch(e){}const el=document.getElementById('magic-email-txt');if(el)el.textContent=email;document.querySelectorAll('.lform').forEach(f=>f.classList.remove('active'));const m=document.getElementById('lf-magic');if(m)m.classList.add('active');document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));}
+
+function fill(e,p){const em=document.getElementById('l-email'),ps=document.getElementById('l-pass');if(em)em.value=e;if(ps)ps.value=p;switchLoginTab('login');}
+
+function switchLoginTab(tab){document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.lform').forEach(f=>f.classList.remove('active'));const form=document.getElementById('lf-'+tab);if(form)form.classList.add('active');const tabs=document.querySelectorAll('.ltab');if(tab==='login'&&tabs[0])tabs[0].classList.add('active');if(tab==='register'&&tabs[1])tabs[1].classList.add('active');}
+
 // ══════════════════════════════════════════════
 // AUTH & USERS
 // ══════════════════════════════════════════════
